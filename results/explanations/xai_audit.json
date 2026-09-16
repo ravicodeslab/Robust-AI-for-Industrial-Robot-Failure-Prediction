@@ -1,0 +1,74 @@
+{
+  "Bearing Failure": {
+    "shap_summary": "The failure prediction was primarily driven by elevated values in Vibration RMS (+0.20), Thermal Gradient (+0.10).",
+    "top_shap_factors": [
+      {
+        "feature": "Vibration RMS",
+        "contribution": 0.2,
+        "value": 0.584,
+        "direction": "POSITIVE"
+      },
+      {
+        "feature": "Thermal Gradient",
+        "contribution": 0.097,
+        "value": 1.6,
+        "direction": "POSITIVE"
+      },
+      {
+        "feature": "Current Ripple (Std)",
+        "contribution": 0.068,
+        "value": 0.267,
+        "direction": "POSITIVE"
+      }
+    ],
+    "gradcam_region": "Model attention concentrated around the upper bearing race interface, identifying localized surface anomalies associated with Bearing Failure."
+  },
+  "Overheating": {
+    "shap_summary": "The failure prediction was primarily driven by elevated values in Motor Current (+0.17), Operating Temperature (+0.15), Thermal Gradient (+0.09).",
+    "top_shap_factors": [
+      {
+        "feature": "Motor Current",
+        "contribution": 0.169,
+        "value": 3.741,
+        "direction": "POSITIVE"
+      },
+      {
+        "feature": "Operating Temperature",
+        "contribution": 0.149,
+        "value": 86.003,
+        "direction": "POSITIVE"
+      },
+      {
+        "feature": "Thermal Gradient",
+        "contribution": 0.089,
+        "value": 10.129,
+        "direction": "POSITIVE"
+      }
+    ],
+    "gradcam_region": "Model attention concentrated around the lower mounting flange, identifying localized surface anomalies associated with Overheating."
+  },
+  "Mechanical Wear": {
+    "shap_summary": "The failure prediction was primarily driven by elevated values in Vibration RMS (+0.21), Motor Current (+0.18), Thermal Gradient (+0.09).",
+    "top_shap_factors": [
+      {
+        "feature": "Vibration RMS",
+        "contribution": 0.212,
+        "value": 0.36,
+        "direction": "POSITIVE"
+      },
+      {
+        "feature": "Motor Current",
+        "contribution": 0.178,
+        "value": 3.105,
+        "direction": "POSITIVE"
+      },
+      {
+        "feature": "Thermal Gradient",
+        "contribution": 0.087,
+        "value": 1.73,
+        "direction": "POSITIVE"
+      }
+    ],
+    "gradcam_region": "Model attention concentrated around the left-side assembly perimeter, identifying localized surface anomalies associated with Mechanical Wear."
+  }
+}

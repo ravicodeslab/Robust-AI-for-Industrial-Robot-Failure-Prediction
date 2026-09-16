@@ -1,0 +1,14 @@
+{
+  "Concatenation Fusion": {
+    "accuracy": 0.125,
+    "f1_score": 0.4,
+    "avg_confidence": 0.3329,
+    "fusion_method": "concat"
+  },
+  "Cross-Attention Fusion (Proposed)": {
+    "accuracy": 0.125,
+    "f1_score": 0.4,
+    "avg_confidence": 0.1773,
+    "fusion_method": "cross_attention"
+  }
+}

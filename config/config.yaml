@@ -1,0 +1,245 @@
+# =============================================================================
+# Explainable & Robust AI for Industrial Robot Failure Prediction
+# Main Configuration File
+# =============================================================================
+
+app:
+  name: "Industrial Robot AI Safety Console"
+  version: "1.0.0"
+  debug: false
+  demo_mode: true  # Set false when real datasets are available
+
+# -----------------------------------------------------------------------------
+# Database
+# -----------------------------------------------------------------------------
+database:
+  url: "sqlite:///./data/robot_safety.db"
+
+# -----------------------------------------------------------------------------
+# Dataset Configuration
+# -----------------------------------------------------------------------------
+dataset:
+  sensor_path: "data/sensor"
+  vision_path: "data/vision"
+  processed_path: "data/processed"
+
+  # Sensor column mapping (map your CSV columns to internal names)
+  sensor_columns:
+    timestamp: "timestamp"
+    vibration: "vibration"
+    current: "current"
+    temperature: "temperature"
+    label: "label"
+
+  # Additional sensor features that may be present
+  optional_columns:
+    - "vibration_x"
+    - "vibration_y"
+    - "vibration_z"
+    - "motor_current"
+    - "ambient_temp"
+
+  # Sliding window for time-series segmentation
+  window_size: 128
+  window_stride: 64
+
+  # Vision dataset structure
+  vision_structure: "class_folders"  # or "flat"
+  image_size: [224, 224]
+
+# -----------------------------------------------------------------------------
+# Failure Classes
+# -----------------------------------------------------------------------------
+failure_classes:
+  - "Normal"
+  - "Bearing Failure"
+  - "Motor Failure"
+  - "Sensor Fault"
+  - "Overheating"
+  - "Mechanical Wear"
+  - "Misalignment"
+  - "Other Failure"
+
+# Component mapping (rule-based, since datasets rarely have component labels)
+component_mapping:
+  "Normal": "Unknown"
+  "Bearing Failure": "Bearing"
+  "Motor Failure": "Motor"
+  "Sensor Fault": "Sensor"
+  "Overheating": "Motor"
+  "Mechanical Wear": "Mechanical Assembly"
+  "Misalignment": "Joint"
+  "Other Failure": "Unknown"
+
+# Severity mapping (rule-based)
+severity_mapping:
+  "Normal": "LOW"
+  "Bearing Failure": "HIGH"
+  "Motor Failure": "HIGH"
+  "Sensor Fault": "MEDIUM"
+  "Overheating": "CRITICAL"
+  "Mechanical Wear": "MEDIUM"
+  "Misalignment": "HIGH"
+  "Other Failure": "MEDIUM"
+
+# -----------------------------------------------------------------------------
+# Model Configuration
+# -----------------------------------------------------------------------------
+model:
+  sensor:
+    architecture: "cnn_lstm"  # options: cnn, lstm, gru, cnn_lstm
+    input_features: ["vibration", "current", "temperature"]
+    window_size: 128
+    cnn_channels: [32, 64, 128]
+    lstm_hidden: 128
+    lstm_layers: 2
+    dropout: 0.3
+    embedding_dim: 256
+
+  vision:
+    architecture: "resnet18"  # options: resnet18, resnet34, efficientnet_b0
+    pretrained: true
+    embedding_dim: 256
+    dropout: 0.3
+    gradcam_layer: "layer4"
+
+  fusion:
+    method: "cross_attention"  # options: concat, cross_attention
+    hidden_dim: 512
+    num_attention_heads: 8
+    dropout: 0.3
+
+  # Paths for saved models
+  paths:
+    sensor: "models/sensor_cnn_lstm/model.pt"
+    vision: "models/vision_resnet/model.pt"
+    fusion_concat: "models/fusion_concat/model.pt"
+    fusion_attention: "models/fusion_attention/model.pt"
+
+# -----------------------------------------------------------------------------
+# Training Configuration
+# -----------------------------------------------------------------------------
+training:
+  epochs: 30
+  batch_size: 32
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  validation_split: 0.2
+  test_split: 0.1
+  patience: 10  # early stopping
+  scheduler: "cosine"  # options: cosine, step, none
+  device: "auto"  # auto, cpu, cuda
+
+# -----------------------------------------------------------------------------
+# Safety Decision Thresholds
+# (All thresholds configurable — do not hard-code in Python)
+# -----------------------------------------------------------------------------
+safety:
+  # Decision thresholds (failure probability)
+  continue_threshold: 0.30      # below this → CONTINUE
+  maintenance_threshold: 0.60   # above this → SCHEDULE MAINTENANCE
+  reduce_speed_threshold: 0.80  # above this (+ severity HIGH) → REDUCE SPEED
+  halt_threshold: 0.90          # above this (+ CRITICAL) → IMMEDIATE HALT
+
+  # Confidence penalty for missing modality
+  missing_modality_confidence_penalty: 0.15
+
+  # Minimum confidence to trust prediction
+  min_confidence_threshold: 0.50
+
+  # Robustness degradation thresholds
+  robustness_degradation_warning: 0.10   # 10% accuracy drop → WARNING
+  robustness_degradation_severe: 0.20    # 20% drop → SEVERE
+
+  # Rules configuration
+  rules:
+    - id: "R001"
+      condition: "probability < continue_threshold AND severity == LOW AND robustness == GOOD"
+      action: "CONTINUE OPERATION"
+      priority: 1
+
+    - id: "R002"
+      condition: "probability >= maintenance_threshold AND probability < reduce_speed_threshold"
+      action: "SCHEDULE MAINTENANCE"
+      priority: 2
+
+    - id: "R003"
+      condition: "probability >= reduce_speed_threshold AND severity == HIGH"
+      action: "REDUCE SPEED"
+      priority: 3
+
+    - id: "R004"
+      condition: "probability >= halt_threshold AND severity == CRITICAL"
+      action: "IMMEDIATE HALT"
+      priority: 4
+
+    - id: "R005"
+      condition: "robustness == SEVERE_DEGRADATION"
+      action: "DEGRADED / VERIFY MANUALLY"
+      priority: 0  # Highest - overrides others
+
+    - id: "R006"
+      condition: "modality_missing == true AND probability >= maintenance_threshold"
+      action: "SCHEDULE MAINTENANCE"
+      priority: 2
+
+# -----------------------------------------------------------------------------
+# Robustness Testing
+# -----------------------------------------------------------------------------
+robustness:
+  noise_levels: [0.0, 0.1, 0.2, 0.3, 0.4]
+  dropout_levels: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+  modality_tests:
+    - "full"
+    - "sensor_only"
+    - "vision_only"
+  snr_levels:
+    clean: 999  # effectively no noise
+    low: 20     # dB
+    medium: 10
+    high: 5
+
+# -----------------------------------------------------------------------------
+# Demo Mode Configuration
+# -----------------------------------------------------------------------------
+demo:
+  num_samples: 500
+  num_classes: 8
+  sensor_window_size: 128
+  image_size: [224, 224]
+  simulation_interval_ms: 2000  # live sim update every 2 seconds
+
+  # Synthetic signal parameters
+  signals:
+    normal_vibration_amp: 0.1
+    fault_vibration_amp: 0.8
+    normal_temp_base: 40.0
+    fault_temp_base: 75.0
+    normal_current_base: 2.0
+    fault_current_base: 4.5
+
+# -----------------------------------------------------------------------------
+# XAI Configuration
+# -----------------------------------------------------------------------------
+xai:
+  shap:
+    background_samples: 100
+    explanation_samples: 50
+    max_display_features: 10
+
+  gradcam:
+    target_layer: "layer4"
+    colormap: "jet"
+    alpha: 0.4  # overlay transparency
+
+# -----------------------------------------------------------------------------
+# API Configuration
+# -----------------------------------------------------------------------------
+api:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins:
+    - "http://localhost:5173"
+    - "http://localhost:3000"
+    - "http://localhost:80"
+  max_upload_size_mb: 100

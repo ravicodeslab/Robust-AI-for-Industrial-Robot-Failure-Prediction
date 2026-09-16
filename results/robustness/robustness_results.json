@@ -1,0 +1,61 @@
+{
+  "noise_curve": [
+    {
+      "noise_level": 0.0,
+      "accuracy": 0.1333
+    },
+    {
+      "noise_level": 0.1,
+      "accuracy": 0.1333
+    },
+    {
+      "noise_level": 0.2,
+      "accuracy": 0.1333
+    },
+    {
+      "noise_level": 0.3,
+      "accuracy": 0.1333
+    },
+    {
+      "noise_level": 0.4,
+      "accuracy": 0.1333
+    }
+  ],
+  "dropout_curve": [
+    {
+      "dropout_level": 0.0,
+      "accuracy": 0.1333
+    },
+    {
+      "dropout_level": 0.1,
+      "accuracy": 0.1333
+    },
+    {
+      "dropout_level": 0.2,
+      "accuracy": 0.1333
+    },
+    {
+      "dropout_level": 0.3,
+      "accuracy": 0.1333
+    },
+    {
+      "dropout_level": 0.4,
+      "accuracy": 0.1333
+    },
+    {
+      "dropout_level": 0.5,
+      "accuracy": 0.1333
+    }
+  ],
+  "missing_modality": {
+    "Full Multimodal": {
+      "accuracy": 0.1333
+    },
+    "Sensor Only (Missing Vision)": {
+      "accuracy": 0.1
+    },
+    "Vision Only (Missing Sensor)": {
+      "accuracy": 0.1
+    }
+  }
+}

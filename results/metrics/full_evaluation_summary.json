@@ -1,0 +1,181 @@
+{
+  "title": "Explainable and Robust AI for Industrial Robot Failure Prediction",
+  "baselines": {
+    "Sensor-Only Baseline": {
+      "accuracy": 0.125,
+      "precision": 0.4,
+      "recall": 0.125,
+      "f1_score": 0.4,
+      "auc_roc": 0.5,
+      "avg_confidence": 0.1307,
+      "samples_evaluated": 40
+    },
+    "Vision-Only Baseline": {
+      "accuracy": 0.025,
+      "precision": 0.4,
+      "recall": 0.025,
+      "f1_score": 0.4,
+      "auc_roc": 0.5,
+      "avg_confidence": 0.1409,
+      "samples_evaluated": 40
+    },
+    "Concatenation Fusion": {
+      "accuracy": 0.125,
+      "precision": 0.4,
+      "recall": 0.125,
+      "f1_score": 0.4,
+      "auc_roc": 0.5,
+      "avg_confidence": 0.3326,
+      "samples_evaluated": 40
+    }
+  },
+  "fusion_comparison": {
+    "Concatenation Fusion": {
+      "accuracy": 0.125,
+      "f1_score": 0.4,
+      "avg_confidence": 0.3329,
+      "fusion_method": "concat"
+    },
+    "Cross-Attention Fusion (Proposed)": {
+      "accuracy": 0.125,
+      "f1_score": 0.4,
+      "avg_confidence": 0.1773,
+      "fusion_method": "cross_attention"
+    }
+  },
+  "robustness": {
+    "noise_curve": [
+      {
+        "noise_level": 0.0,
+        "accuracy": 0.1333
+      },
+      {
+        "noise_level": 0.1,
+        "accuracy": 0.1333
+      },
+      {
+        "noise_level": 0.2,
+        "accuracy": 0.1333
+      },
+      {
+        "noise_level": 0.3,
+        "accuracy": 0.1333
+      },
+      {
+        "noise_level": 0.4,
+        "accuracy": 0.1333
+      }
+    ],
+    "dropout_curve": [
+      {
+        "dropout_level": 0.0,
+        "accuracy": 0.1333
+      },
+      {
+        "dropout_level": 0.1,
+        "accuracy": 0.1333
+      },
+      {
+        "dropout_level": 0.2,
+        "accuracy": 0.1333
+      },
+      {
+        "dropout_level": 0.3,
+        "accuracy": 0.1333
+      },
+      {
+        "dropout_level": 0.4,
+        "accuracy": 0.1333
+      },
+      {
+        "dropout_level": 0.5,
+        "accuracy": 0.1333
+      }
+    ],
+    "missing_modality": {
+      "Full Multimodal": {
+        "accuracy": 0.1333
+      },
+      "Sensor Only (Missing Vision)": {
+        "accuracy": 0.1
+      },
+      "Vision Only (Missing Sensor)": {
+        "accuracy": 0.1
+      }
+    }
+  },
+  "xai": {
+    "Bearing Failure": {
+      "shap_summary": "The failure prediction was primarily driven by elevated values in Vibration RMS (+0.20), Thermal Gradient (+0.10).",
+      "top_shap_factors": [
+        {
+          "feature": "Vibration RMS",
+          "contribution": 0.2,
+          "value": 0.584,
+          "direction": "POSITIVE"
+        },
+        {
+          "feature": "Thermal Gradient",
+          "contribution": 0.097,
+          "value": 1.6,
+          "direction": "POSITIVE"
+        },
+        {
+          "feature": "Current Ripple (Std)",
+          "contribution": 0.068,
+          "value": 0.267,
+          "direction": "POSITIVE"
+        }
+      ],
+      "gradcam_region": "Model attention concentrated around the upper bearing race interface, identifying localized surface anomalies associated with Bearing Failure."
+    },
+    "Overheating": {
+      "shap_summary": "The failure prediction was primarily driven by elevated values in Motor Current (+0.17), Operating Temperature (+0.15), Thermal Gradient (+0.09).",
+      "top_shap_factors": [
+        {
+          "feature": "Motor Current",
+          "contribution": 0.169,
+          "value": 3.741,
+          "direction": "POSITIVE"
+        },
+        {
+          "feature": "Operating Temperature",
+          "contribution": 0.149,
+          "value": 86.003,
+          "direction": "POSITIVE"
+        },
+        {
+          "feature": "Thermal Gradient",
+          "contribution": 0.089,
+          "value": 10.129,
+          "direction": "POSITIVE"
+        }
+      ],
+      "gradcam_region": "Model attention concentrated around the lower mounting flange, identifying localized surface anomalies associated with Overheating."
+    },
+    "Mechanical Wear": {
+      "shap_summary": "The failure prediction was primarily driven by elevated values in Vibration RMS (+0.21), Motor Current (+0.18), Thermal Gradient (+0.09).",
+      "top_shap_factors": [
+        {
+          "feature": "Vibration RMS",
+          "contribution": 0.212,
+          "value": 0.36,
+          "direction": "POSITIVE"
+        },
+        {
+          "feature": "Motor Current",
+          "contribution": 0.178,
+          "value": 3.105,
+          "direction": "POSITIVE"
+        },
+        {
+          "feature": "Thermal Gradient",
+          "contribution": 0.087,
+          "value": 1.73,
+          "direction": "POSITIVE"
+        }
+      ],
+      "gradcam_region": "Model attention concentrated around the left-side assembly perimeter, identifying localized surface anomalies associated with Mechanical Wear."
+    }
+  }
+}
