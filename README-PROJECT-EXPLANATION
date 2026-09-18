@@ -1,0 +1,660 @@
+# Industrial Robot Failure Prediction Project – Full Project Guide
+
+This project is a research-style industrial AI dashboard for predicting equipment failures in autonomous robot systems using multiple data sources.
+
+It combines:
+- sensor telemetry (vibration, current, temperature),
+- machine vision inspection images,
+- multimodal AI fusion,
+- explainable AI outputs,
+- safety rule evaluation,
+- robustness testing, and
+- a web dashboard for monitoring and decision support.
+
+The goal is not just to predict failure, but also to explain why the model thinks a failure may happen and to support safe operational decisions.
+
+---
+
+## 1. Project Purpose
+
+The system is designed for a robot cell or industrial manufacturing environment where a robot is working continuously. The system monitors:
+- vibration levels,
+- motor current,
+- temperature,
+- and camera inspection images.
+
+Using these signals, the model predicts whether the robot is in a normal state or likely to experience a failure such as:
+- bearing failure,
+- mechanical wear,
+- overheating,
+- misalignment,
+- motor failure,
+- or general abnormal behavior.
+
+In addition to prediction, the platform:
+- explains which sensor signals matter most,
+- shows the image region used by the model,
+- checks whether the system stays robust under noise/dropout,
+- applies safety rules,
+- and presents all this in a dashboard for human operators.
+
+This makes the project helpful for both research and industrial decision support.
+
+---
+
+## 2. Big Picture Architecture
+
+The project has 3 primary layers:
+
+### A. Frontend (React + TypeScript)
+This is the dashboard the user sees in the browser. It contains all the pages for:
+- overview,
+- sensor monitoring,
+- vision inspection,
+- prediction,
+- explainability,
+- model comparison,
+- experiments,
+- datasets,
+- training,
+- safety decisions,
+- and settings.
+
+The frontend talks to the backend through REST API calls.
+
+### B. Backend (FastAPI)
+This is the API layer that receives requests, runs ML logic, and returns processed results as JSON.
+
+It provides endpoints for:
+- health checks,
+- live telemetry stream,
+- predictions,
+- explainability,
+- safety decisions,
+- experiments,
+- datasets,
+- training,
+- alerts,
+- and robustness testing.
+
+### C. ML / Research Layer
+This layer contains the actual model logic, feature engineering, synthetic data generation, safety rules, and robustness simulation.
+
+It includes:
+- multimodal fusion model code,
+- sensor preprocessing,
+- vision preprocessing,
+- robustness noise/dropout simulation,
+- rule-based safety logic,
+- and explainability components.
+
+---
+
+## 3. How the Project Works End-to-End
+
+The normal workflow is:
+
+1. Telemetry is generated or simulated from robot sensor readings.
+2. The frontend requests live data or a prediction.
+3. The backend calls the ML prediction pipeline.
+4. The model processes sensor and image inputs.
+5. It returns:
+   - failure class,
+   - confidence score,
+   - affected component,
+   - severity,
+   - recommended action,
+   - and safety reasoning.
+6. The system also checks safety rules.
+7. Explainability modules highlight which features or image parts drove the decision.
+8. The dashboard displays the results to the user with charts, cards, and alerts.
+
+This is a full AI decision-support system, not just a model file sitting alone in a notebook.
+
+---
+
+## 4. Main Technologies Used
+
+### Backend
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- SQLite
+- PyTorch
+- NumPy
+- PIL / Pillow
+- SHAP
+- Uvicorn
+- pytest
+
+### Frontend
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Axios
+- Recharts
+- Lucide React
+
+### Research / Modeling
+- multimodal sensor + vision fusion
+- transformer-style cross-attention fusion
+- synthetic dataset generation
+- robustness tests with noise and dropout
+- explainability methods for prediction transparency
+
+---
+
+## 5. Project Folder Structure
+
+```text
+failure prediction/
+├── backend/
+│   ├── requirements.txt
+│   └── robot_app/
+│       ├── api/
+│       │   ├── alerts.py
+│       │   ├── datasets.py
+│       │   ├── experiments.py
+│       │   ├── explain.py
+│       │   ├── health.py
+│       │   ├── models.py
+│       │   ├── predict.py
+│       │   ├── robustness.py
+│       │   ├── safety.py
+│       │   └── train.py
+│       ├── core/
+│       │   ├── config.py
+│       │   ├── database.py
+│       │   └── logging_config.py
+│       ├── ml/
+│       │   ├── demo_generator.py
+│       │   ├── predictor.py
+│       │   ├── fusion/
+│       │   ├── sensor_model/
+│       │   └── vision_model/
+│       ├── models/
+│       │   ├── __init__.py
+│       │   └── db_models.py
+│       ├── robustness/
+│       ├── safety/
+│       │   └── rules.py
+│       ├── schemas/
+│       ├── xai/
+│       │   ├── gradcam_explainer.py
+│       │   └── shap_explainer.py
+│       └── main.py
+│
+├── frontend/
+│   ├── src/
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── ...
+│
+├── ml/
+│   ├── fusion/
+│   ├── preprocessing/
+│   ├── robustness/
+│   ├── safety/
+│   ├── sensor_model/
+│   ├── utils/
+│   └── vision_model/
+│
+├── experiments/
+│   ├── run_baselines.py
+│   ├── run_full_evaluation.py
+│   ├── run_fusion.py
+│   ├── run_robustness.py
+│   └── run_xai.py
+│
+├── config/
+│   └── config.yaml
+│
+├── data/
+│   ├── sensor/
+│   ├── vision/
+│   └── processed/
+│
+├── models/
+├── results/
+├── tests/
+├── run.py
+├── README.md
+├── README_PROJECT_GUIDE.md
+└── ...
+```
+
+---
+
+## 6. Main Backend Modules and What They Do
+
+### 6.1 `backend/robot_app/main.py`
+This is the main FastAPI application entry point.
+
+It does important startup work:
+- initializes settings,
+- creates database tables,
+- sets up CORS,
+- includes all API routers,
+- and serves the frontend build if it exists.
+
+This file is the central hub for the backend.
+
+### 6.2 `backend/robot_app/api/health.py`
+Returns the health status of the app.
+
+Example response includes:
+- status,
+- system name,
+- app version,
+- demo mode,
+- timestamp,
+- CPU usage,
+- memory usage.
+
+This tells you whether the server is alive and healthy.
+
+### 6.3 `backend/robot_app/api/predict.py`
+This is the prediction endpoint group for:
+- sensor-only prediction,
+- vision-only prediction,
+- multimodal prediction,
+- and demo/live simulation.
+
+It takes user input and sends it to the model predictor.
+
+### 6.4 `backend/robot_app/api/explain.py`
+This provides explainability results.
+
+It supports:
+- SHAP explanations,
+- Grad-CAM overlay generation,
+- summary text for the model output.
+
+This is critical because the project is not only a classifier—it is an explainable AI system.
+
+### 6.5 `backend/robot_app/api/robustness.py`
+This evaluates model performance under stress conditions.
+
+It tests the system under:
+- different noise levels,
+- sensor dropout rates,
+- and missing modality scenarios.
+
+The goal is to measure how well the model behaves when the data quality is poor.
+
+### 6.6 `backend/robot_app/api/safety.py`
+This applies rule-based safety logic to model output.
+
+It checks:
+- confidence,
+- severity,
+- failure type,
+- and system state,
+
+then decides the recommended operator action such as:
+- continue operation,
+- reduce speed,
+- schedule maintenance,
+- or immediate halt.
+
+### 6.7 `backend/robot_app/api/models.py`
+This exposes model metadata and comparison information.
+
+It is used by the model comparison page to show model performance across architectures.
+
+### 6.8 `backend/robot_app/api/experiments.py`
+This provides experiment details and benchmark logs.
+
+It supports the experiments page so the user can review research data and experiment history.
+
+### 6.9 `backend/robot_app/api/datasets.py`
+This is used for dataset registration and upload.
+
+It allows storing or cataloging:
+- sensor CSV files,
+- image datasets,
+- or multimodal benchmark data.
+
+The page shows dataset metadata, sample count, detected mapping, and storage location.
+
+### 6.10 `backend/robot_app/api/train.py`
+This endpoint(s) support model training and training status reporting.
+
+It is used by the Training page in the dashboard.
+
+### 6.11 `backend/robot_app/api/alerts.py`
+This manages alerts from the system.
+
+It allows:
+- reading current alerts,
+- updating them,
+- and acknowledging them through the UI.
+
+---
+
+## 7. Frontend Pages and What They Do
+
+The frontend is organized as a large dashboard. Each page connects to a specific part of the project.
+
+### 1. Overview Page
+This is the main landing page.
+
+It shows:
+- robot status,
+- failure risk,
+- latest prediction,
+- recommended action,
+- sensor status,
+- and recent alerts.
+
+This page is designed to give the operator a quick summary of the machine state.
+
+### 2. Sensor Monitor Page
+This page focuses on sensor telemetry.
+
+It displays:
+- vibration,
+- current,
+- temperature,
+- signal trends,
+- and warning thresholds.
+
+This is important because many anomalies start in the vibration or current signals before a failure becomes obvious.
+
+### 3. Vision Inspection Page
+This page is for camera and visual inspection.
+
+It allows the operator to:
+- inspect image input,
+- review visual anomalies,
+- and see attention or overlay maps if available.
+
+This is the visual branch of the multimodal model.
+
+### 4. AI Prediction Page
+This is the direct inference page.
+
+It is where users can send a prediction request and inspect:
+- failure class,
+- confidence,
+- affected component,
+- probability distribution,
+- recommended action,
+- and safety reasoning.
+
+This page is the main decision-support interface.
+
+### 5. Explainability Page
+This page explains the model’s decision.
+
+It shows:
+- SHAP feature importance,
+- Grad-CAM heatmap overlays,
+- and reasoning text for why the model judged a failure likely.
+
+This is essential for trust and transparency.
+
+### 6. Robustness Lab Page
+This page stress-tests the model.
+
+It evaluates:
+- noise injection,
+- sensor dropout,
+- missing modality behavior,
+- and prediction stability under degraded conditions.
+
+This is critical in industrial settings, where sensor quality may degrade or cameras may fail.
+
+### 7. Safety Decision Page
+This page evaluates the safety interpretation of the model result.
+
+It checks whether the predicted failure should trigger:
+- continue operation,
+- reduce speed,
+- maintenance recommendation,
+- or immediate halt.
+
+This page turns raw model output into operational decisions.
+
+### 8. Model Comparison Page
+This page compares different model architectures or fusion strategies.
+
+It is useful for benchmarking:
+- sensor-only model,
+- vision-only model,
+- concatenation-based fusion,
+- cross-attention fusion,
+- and baseline models.
+
+### 9. Experiments Page
+This page is for research tracking.
+
+It shows:
+- experiment numbers,
+- model architecture,
+- dataset,
+- metric results,
+- and other experiment metadata.
+
+This is used to track scientific evaluations and compare results over time.
+
+### 10. Datasets Page
+This page lists datasets used by the project.
+
+It supports:
+- dataset upload,
+- metadata display,
+- data-type classification,
+- and inferred column mapping.
+
+This is important for preparing data for training and evaluation.
+
+### 11. Training Page
+This page is for model training workflows.
+
+It allows users to configure:
+- model type,
+- fusion method,
+- learning rate,
+- epochs,
+- batch size,
+- validation split,
+- and other hyperparameters.
+
+This is the platform’s training control center.
+
+### 12. Settings Page
+This page contains project configuration settings.
+
+It is used to manage:
+- threshold values,
+- robot configuration,
+- system behavior,
+- and app-level operational parameters.
+
+---
+
+## 8. How the AI Model Works
+
+The project is based on a multimodal failure prediction architecture.
+
+### Sensor path
+The sensor input includes:
+- vibration,
+- current,
+- temperature.
+
+These data are passed through a sensor encoder that learns temporal patterns and detects anomalies.
+
+### Vision path
+The camera input is a visual inspection image.
+
+The vision model extracts spatial features and looks for physical defects, wear, or abnormal surface patterns.
+
+### Fusion path
+The outputs of both branches are combined using a fusion method such as:
+- concatenation,
+- or cross-attention fusion.
+
+The cross-attention approach allows the system to dynamically prioritize which modality is more informative for the current case.
+
+### Output
+The final system returns:
+- a predicted failure class,
+- confidence,
+- affected component,
+- connected safety flags,
+- and recommended action.
+
+---
+
+## 9. Explainability in the Project
+
+Explainability is a major focus. The project does not just say “fault detected”; it explains why.
+
+### SHAP
+SHAP is used to show which sensor features contributed most to the prediction. For example:
+- vibration RMS,
+- motor current,
+- temperature drift,
+- or signal variance.
+
+This helps identify which input features most strongly affected the decision.
+
+### Grad-CAM
+Grad-CAM is used to show which region of the image influenced the model most.
+
+This is especially useful for visual inspections because it can highlight the exact region of a part that appears defective.
+
+### Why this matters
+In industrial systems, operators need to trust the model. Explainability ensures the system is more transparent and easier to validate.
+
+---
+
+## 10. Safety and Rule-Based Decision Logic
+
+The project does not rely on AI alone. It also includes a safety rule engine.
+
+This rule engine can evaluate:
+- confidence thresholds,
+- failure severity,
+- system robustness,
+- missing modality conditions,
+- and operator constraints.
+
+Then it recommends actions such as:
+- CONTINUE OPERATION
+- REDUCE SPEED
+- SCHEDULE MAINTENANCE
+- IMMEDIATE HALT
+
+This is important because in a safety-critical environment, the model should support decisions but still be bound by clear operational rules.
+
+---
+
+## 11. Robustness Testing
+
+Industrial conditions are noisy and imperfect. Sensors may degrade, cameras may fail, or data may be incomplete.
+
+This project tests for robustness by simulating:
+- Gaussian noise on sensor signals,
+- sensor dropout,
+- and missing modality inputs.
+
+The robustness lab helps answer questions like:
+- How well does the model behave when the sensor starts failing?
+- What happens if visual data is missing?
+- How much does model performance degrade as noise increases?
+
+This is one of the major research strengths of the system.
+
+---
+
+## 12. Data Flow in the Dashboard
+
+The dashboard generally follows this path:
+
+1. UI loads the page.
+2. Frontend calls API endpoints.
+3. Backend computes or fetches data.
+4. Results are displayed in cards, charts, and tables.
+5. Users can trigger a new prediction or run a new test.
+
+Examples:
+- Overview page triggers a demo prediction automatically.
+- Robustness page runs a stress test and charts the degradation curve.
+- Explainability page requests SHAP/Grad-CAM data.
+- Datasets page lists or uploads benchmark data.
+- Training page starts training with user parameters.
+
+---
+
+## 13. Typical Use Cases
+
+This project is useful for:
+- robot maintenance planning,
+- failure prediction in manufacturing cells,
+- safe operation monitoring,
+- manufacturing quality inspection,
+- industrial AI research,
+- and explainable decision support.
+
+It is especially relevant in environments where accuracy alone is not enough—operators also need to understand the prediction and act safely.
+
+---
+
+## 14. What the Project Is Not
+
+This is not a fully production-grade industrial deployment system with a real PLC or edge device integration.
+
+It is best understood as:
+- a research prototype,
+- a full-stack AI demo, 
+- a visual analytics dashboard,
+- and an explainable failure prediction system.
+
+It is designed to demonstrate the concepts clearly and make them easy to explore in an interactive app.
+
+---
+
+## 15. Recommended Way to Understand the Project
+
+If you are new to the project, the best flow is:
+
+1. Read the frontend app entry point in `frontend/src/App.tsx`
+2. Understand the dashboard layout in `frontend/src/layouts/DashboardLayout.tsx`
+3. Open each page under `frontend/src/pages/`
+4. Browse the API routes under `backend/robot_app/api/`
+5. Study the model logic in `backend/robot_app/ml/` and `ml/`
+6. Review the configuration in `config/config.yaml`
+7. Run the app and test the pages one by one
+
+This gives you a complete understanding from UI to backend to ML.
+
+---
+
+## 16. Summary
+
+This project is a complete industrial AI safety dashboard for robot failure prediction and decision support.
+
+It combines:
+- sensor analytics,
+- vision inspection,
+- multimodal machine learning,
+- explainability,
+- robustness testing,
+- safety rules,
+- and a modern dashboard interface.
+
+The core value is that it does not just predict failures—it explains them and helps operators act safely and intelligently.
+
+---
+
+## 17. Final Thought
+
+If you want to understand the system in one sentence:
+
+> This project is an explainable multimodal AI system for monitoring industrial robots, predicting failures, explaining the model’s decisions, and helping operators make safe maintenance actions.
+
